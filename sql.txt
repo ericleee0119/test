@@ -1,0 +1,24 @@
+WITH RecursiveDates AS (
+  SELECT DATE(CURRENT_DATE()) AS StartDate, DATE(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH)) AS EndDate
+  UNION ALL
+  SELECT DATE(DATE_SUB(StartDate, INTERVAL 1 DAY)) AS StartDate, EndDate
+  FROM RecursiveDates
+  WHERE StartDate > DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH)
+),
+AllTables AS (
+  SELECT FORMAT_DATE('%Y%m%d', StartDate) AS table_date
+  FROM RecursiveDates
+),
+AllTableNames AS (
+  SELECT ARRAY(SELECT AS STRUCT * FROM UNNEST(REGEXP_EXTRACT_ALL(REGEXP_REPLACE(TABLE_NAME, r'table_', ''), r'\d{8}')) ORDER BY 1 DESC) AS table_dates
+  FROM `your_project_id.your_dataset_id.INFORMATION_SCHEMA.TABLES`
+  WHERE TABLE_NAME LIKE 'table_%'
+)
+SELECT *
+FROM (
+  SELECT table_date
+  FROM AllTables
+  JOIN AllTableNames ON ARRAY_CONTAINS(AllTableNames.table_dates, table_date)
+)
+LEFT JOIN `your_project_id.your_dataset_id.bigTable`
+USING (table_date)
