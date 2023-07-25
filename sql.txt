@@ -1,13 +1,9 @@
-WITH RECURSIVE date_range AS (
-  SELECT DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY) AS date
-  UNION ALL
-  SELECT DATE_ADD(date, INTERVAL 1 DAY)
-  FROM date_range
-  WHERE DATE_ADD(date, INTERVAL 1 DAY) <= CURRENT_DATE()
-)
-
-SELECT *
-FROM (
-  SELECT * FROM `abc.analytics_255.event_`
-  WHERE _TABLE_SUFFIX = FORMAT_DATE('%Y%m%d', (SELECT date FROM date_range))
-)
+SELECT * FROM `abc.analytics_255.event_20230724`
+UNION ALL
+SELECT * FROM `abc.analytics_255.event_20230723`
+UNION ALL
+SELECT * FROM `abc.analytics_255.event_20230722`
+UNION ALL
+SELECT * FROM `abc.analytics_255.event_20230721`
+UNION ALL
+SELECT * FROM `abc.analytics_255.event_20230720`
